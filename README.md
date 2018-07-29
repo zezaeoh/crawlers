@@ -28,11 +28,11 @@
 ## Poodle_Crawler
 ### spider
 * **poodle_crawler** : dcinside 크롤링
-## how to use
+### how to use
 * $ scrapy crawl poodle_crawler -a gall_id=<갤러리 id>
 
 ## Dachshund_Crawler
 ### spider
 * **dachshund_crawler** : 네이버카페 레몬테라스 크롤링
-## how to use
+### how to use
 * $ scrapy crawl dachshund_crawler
