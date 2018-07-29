@@ -43,8 +43,8 @@ class PoodleCrawlSpider(scrapy.Spider):
         spider.prefix = 'http://gall.dcinside.com'
         spider.postPage = 'http://gall.dcinside.com/board/lists/?id=%s&page={}' % gall_id
         spider.i = 1
-        if os.path.isfile('/var/log/{}.log'.format(cls.name + '_' + spider.gall_id)):
-            with open('/var/log/{}.log'.format(cls.name + '_' + spider.gall_id), mode='rt', encoding='utf-8') as f:
+        if os.path.isfile('./log/{}.log'.format(cls.name + '_' + spider.gall_id)):
+            with open('./log/{}.log'.format(cls.name + '_' + spider.gall_id), mode='rt', encoding='utf-8') as f:
                 s = f.read()
                 if s:
                     spider.mode = True
@@ -62,7 +62,7 @@ class PoodleCrawlSpider(scrapy.Spider):
         return spider
 
     def spider_closed(self, spider):
-        with open('/var/log/{}.log'.format(self.name + '_' + self.gall_id), mode='wt', encoding='utf-8') as f:
+        with open('./log/{}.log'.format(self.name + '_' + self.gall_id), mode='wt', encoding='utf-8') as f:
             f.write(' '.join(spider.furl))
         print('Work time:', datetime.now() - spider.started_on)
 

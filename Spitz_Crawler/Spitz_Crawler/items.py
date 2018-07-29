@@ -1,8 +1,17 @@
 import scrapy
 from scrapy.loader.processors import MapCompose, Join, TakeFirst
 
+filter_list = [
+    'http',
+    'https',
+    'adsbygoogle'
+]
+
 
 def filter_strip(v):
+    for a in filter_list:
+        if a in v:
+            return ''
     return v.strip()
 
 

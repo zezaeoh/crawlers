@@ -81,7 +81,7 @@ class SpitzCrawlSpider(scrapy.Spider):
                             raise CloseSpider('termination condition met')
                 item['writer'] = link.xpath('./div/div[2]/span[3]/text()').extract()
                 item['title'] = link.xpath('./div/div[3]/h2/text()').extract()
-                rq = scrapy.Request(self.prefix + url, callback=self.parse_post)
+                rq = scrapy.Request(self.prefix + url[:url.find('&page')], callback=self.parse_post)
                 rq.meta['item'] = item
                 yield rq
         self.i += 1
@@ -94,9 +94,7 @@ class SpitzCrawlSpider(scrapy.Spider):
         item = response.meta['item']
         i.add_value('title', item['title'])
         i.add_value('writer', item['writer'])
-        i.add_xpath('content', '/html/body//div[@class="viewContent"]/text()')
-        i.add_xpath('content', '/html/body//div[@class="viewContent"]//*[not(self::script)]/text()')
-        i.add_xpath('content', '/html/body//div[@class="viewContent"]//*[not(self::script)]//*[not(self::script)]/text()')
+        i.add_xpath('content', '/html/body//div[@class="viewContent"]//text()')
         i.add_value('date', item['date'])
         i.add_xpath('pic', '/html/body//div[@class="viewContent"]//img/@src')
         i.add_value('url', response.url)

@@ -22,3 +22,5 @@ class DynamoDBPipeline(object):
         log.msg("Post added to DynamoDB database!",
                 level=log.DEBUG, spider=spider)
         return item
+
+
