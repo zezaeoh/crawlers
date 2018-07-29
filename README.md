@@ -9,7 +9,7 @@
 
 ## Item Pipeline
 * 현재 boto3 lib을 이용하여 aws DynamoDB에 연결 되어있으므로 똑같은 형식으로 사용하려면 ~/.aws 에 credential 파일 생성 후 사용가능
-* $ aws configure **(aws cli가 설치 되어있다는 가정하에)
+* $ aws configure **(aws cli가 설치 되어있다는 가정하에)**
 
 ## Spitz_Crawler
 ### spider
