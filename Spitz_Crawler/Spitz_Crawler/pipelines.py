@@ -17,7 +17,7 @@ class DynamoDBPipeline(object):
 
     def process_item(self, item, spider):
         item['comID'] = self.comID
-        item['postID'] = datetime.now().strftime('%Y%m%d%H%M%S%f') + uuid.uuid4().hex
+        item['postID'] = datetime.now().strftime('%Y%m%d%H%M%S%f')[:15] + uuid.uuid4().hex[:5]
         self.table.put_item(Item=dict((k, v) for k, v in item.items() if v))
         log.msg("Post added to DynamoDB database!",
                 level=log.DEBUG, spider=spider)
