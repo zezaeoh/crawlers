@@ -57,6 +57,7 @@ class DachshundCrawlSpider(scrapy.Spider):
     def start_requests(self):
         url = self.postPage.format(self.i)
         rq = scrapy.Request(url, callback=self.parse)
+        rq.meta['reconnect'] = False
         yield rq
 
     def is_okay(self, response, match):
@@ -82,7 +83,7 @@ class DachshundCrawlSpider(scrapy.Spider):
             url = link.xpath('./a[1]/@href').extract_first()
             match = self.p.search(url)
             if match:
-                if len(self.furl) <= 5:
+                if len(self.furl) <= 10:
                     furl = self.articleid + match.group(1)
                     self.furl.append(furl)
                 item = {'writer': link.xpath('./a[1]/div[@class="user_area"]/span[@class="nick"]//text()').extract(),
@@ -97,7 +98,7 @@ class DachshundCrawlSpider(scrapy.Spider):
                 next_url = tmp['url']
                 break
         rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                            meta={'item': tmp['item']})
+                            meta={'item': tmp['item'], 'reconnect': False})
         self.visited_links.add(next_url)
         return rq
 
@@ -115,16 +116,24 @@ class DachshundCrawlSpider(scrapy.Spider):
         i.add_value('url', response.url)
         re_i = i.load_item()
         if 'date' not in re_i:
+            tmp = response.xpath('//div[@class="error_content_body"]/h2//text()').extract()
+            print(tmp)
+            for a in tmp:
+                if '카페 멤버만 볼 수 있습니다.' in a:
+                    rq = scrapy.Request(url=response.url, callback=self.parse_post, dont_filter=True,
+                                        meta={'item': item, 'reconnect': True})
+                    return rq
             if self.url_list:
                 tmp = self.url_list.pop(0)
                 next_url = tmp['url']
                 rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                                    meta={'item': tmp['item']})
+                                    meta={'item': tmp['item'], 'reconnect': False})
                 self.visited_links.add(next_url)
                 return rq
             else:
                 self.i += 1
                 rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
+                rq.meta['reconnect'] = False
                 return rq
         match = self.r.search(re_i['date'])
         if match:
@@ -133,12 +142,13 @@ class DachshundCrawlSpider(scrapy.Spider):
                     tmp = self.url_list.pop(0)
                     next_url = tmp['url']
                     rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                                        meta={'item': tmp['item']})
+                                        meta={'item': tmp['item'], 'reconnect': False})
                     self.visited_links.add(next_url)
                     return re_i, rq
                 else:
                     self.i += 1
                     rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
+                    rq.meta['reconnect'] = False
                     return re_i, rq
             else:
                 raise CloseSpider('termination condition met')

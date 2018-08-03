@@ -10,16 +10,16 @@ class JavaScriptMiddleware(object):
     @classmethod
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.
-        usr_id = "newsdog620"
-        pw = "shiba620"
         s = cls()
+        s.usr_id = "newsdog620"
+        s.pw = "shiba620"
         s.driver = webdriver.PhantomJS()
 
         s.driver.get("https://nid.naver.com/nidlogin.login")
         elem = s.driver.find_element_by_id("id")
-        elem.send_keys(usr_id)
+        elem.send_keys(s.usr_id)
         elem = s.driver.find_element_by_id("pw")
-        elem.send_keys(pw)
+        elem.send_keys(s.pw)
         elem.send_keys(Keys.RETURN)
         time.sleep(1)
         print('login okay')
@@ -28,6 +28,15 @@ class JavaScriptMiddleware(object):
         return s
 
     def process_request(self, request, spider):
+        if request.meta['reconnect']:
+            self.driver.get("https://nid.naver.com/nidlogin.login")
+            elem = self.driver.find_element_by_id("id")
+            elem.send_keys(self.usr_id)
+            elem = self.driver.find_element_by_id("pw")
+            elem.send_keys(self.pw)
+            elem.send_keys(Keys.RETURN)
+            time.sleep(1)
+            print('reconnect okay')
         print("rendering...")
         self.driver.get(request.url)
         time.sleep(1)
