@@ -90,12 +90,12 @@ class DachshundCrawlSpider(scrapy.Spider):
                 self.url_list.append({'url': self.prefix + self.article.format(match.group(1)),
                                       'item': item})
         while True:
+            if not self.url_list:
+                return
             tmp = self.url_list.pop(0)
             if tmp['url'] not in self.visited_links:
                 next_url = tmp['url']
                 break
-            if not self.url_list:
-                return
         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                             meta={'item': tmp['item']})
         self.visited_links.add(next_url)
