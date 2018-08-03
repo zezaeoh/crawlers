@@ -41,3 +41,10 @@
 * **dachshund_crawler** : 네이버카페 레몬테라스 크롤링
 ### how to use
 * $ scrapy crawl dachshund_crawler
+
+## Pointer_Crawler
+### spider
+* **pointer_crawler** : 클리앙 크롤링
+### how to use
+* $ scrapy crawl pointer_crawler
+* _현재 테스트중이므로 Json파일로만 저장됩니다._
