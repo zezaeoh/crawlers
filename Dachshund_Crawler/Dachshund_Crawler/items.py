@@ -35,8 +35,8 @@ def filter_date(v):
 
 
 class DachshundCrawlerItem(scrapy.Item):
-    comID = scrapy.Field()
-    postID = scrapy.Field()
+    r_id = scrapy.Field()
+    media = scrapy.Field()
     title = scrapy.Field(
         input_processor=MapCompose(filter_strip),
         output_processor=TakeFirst()
@@ -58,3 +58,4 @@ class DachshundCrawlerItem(scrapy.Item):
     )  # 게시글 주소
     pic = scrapy.Field()  # 사진
     pass
+

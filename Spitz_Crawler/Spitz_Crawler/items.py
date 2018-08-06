@@ -17,8 +17,8 @@ def filter_strip(v):
 
 class SpitzCrawlerItem(scrapy.Item):
     # define the fields for your item here like:
-    comID = scrapy.Field()
-    postID = scrapy.Field()
+    r_id = scrapy.Field()
+    media = scrapy.Field()
     title = scrapy.Field(
         input_processor=MapCompose(filter_strip),
         output_processor=TakeFirst()

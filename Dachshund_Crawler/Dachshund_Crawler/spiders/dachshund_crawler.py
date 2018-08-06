@@ -117,12 +117,14 @@ class DachshundCrawlSpider(scrapy.Spider):
         re_i = i.load_item()
         if 'date' not in re_i:
             tmp = response.xpath('//div[@class="error_content_body"]/h2//text()').extract()
-            print(tmp)
+            print('connection error')
             for a in tmp:
                 if '카페 멤버만 볼 수 있습니다.' in a:
+                    print('try reconnection')
                     rq = scrapy.Request(url=response.url, callback=self.parse_post, dont_filter=True,
                                         meta={'item': item, 'reconnect': True})
                     return rq
+            print('move on to next url')
             if self.url_list:
                 tmp = self.url_list.pop(0)
                 next_url = tmp['url']

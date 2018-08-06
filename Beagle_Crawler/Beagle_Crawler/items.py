@@ -15,8 +15,8 @@ def filter_date(v):
 
 
 class BeagleCrawlerItem(scrapy.Item):
-    comID = scrapy.Field()
-    postID = scrapy.Field()
+    r_id = scrapy.Field()
+    media = scrapy.Field()
     title = scrapy.Field(
         input_processor=MapCompose(filter_strip),
         output_processor=TakeFirst()
