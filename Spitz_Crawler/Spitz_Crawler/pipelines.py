@@ -45,5 +45,3 @@ class DynamoDBPipeline(object):
             }
         )
         print('indexing over')
-
-

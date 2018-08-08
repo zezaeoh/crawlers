@@ -21,8 +21,8 @@ class SpitzCrawlSpider(scrapy.Spider):
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super(SpitzCrawlSpider, cls).from_crawler(crawler, *args, **kwargs)
         spider.started_on = datetime.now()
-        print(spider.started_on)
-        spider.r = re.compile(r'(\d+)/(\d+)/(\d+) (\d+):(\d+)')
+        spider.visited_links = set()
+        spider.r = re.compile(r'(\d+)-(\d+)-(\d+) (\d+):(\d+)')
         spider.p = re.compile(r'view.php\?table=.*')
         spider.prefix = 'http://m.todayhumor.co.kr/'
         spider.postPage = 'http://m.todayhumor.co.kr/list.php?table=total&page={}'
@@ -55,7 +55,25 @@ class SpitzCrawlSpider(scrapy.Spider):
         rq = scrapy.Request(url, callback=self.parse)
         yield rq
 
+    def is_okay(self, response, match):
+        if self.mode:
+            for t_url in self.url:
+                if t_url in response.url:
+                    return False
+            return True
+        else:
+            hr = (self.started_on - datetime(int(match.group(1)), int(match.group(2)), int(match.group(3)),
+                                             int(match.group(4)), int(match.group(5))))
+            if hr.days < 1:
+                if (hr.seconds // 3600) > 6:
+                    return False
+                else:
+                    return True
+            else:
+                return False
+
     def parse(self, response):
+        self.url_list = []
         for link in response.xpath('/html/body//a'):
             url = link.xpath('./@href').extract_first()
             if self.p.search(url):
@@ -63,39 +81,47 @@ class SpitzCrawlSpider(scrapy.Spider):
                     furl = self.prefix + url
                     furl = furl[:furl.find('&page')]
                     self.furl.append(furl)
-                item = {}
-                item['date'] = link.xpath('./div/div[2]/span[2]/text()').extract_first()
-                match = self.r.search(item['date'])
-                if match:
-                    if self.mode:
-                        for t_url in self.url:
-                            if t_url in (self.prefix + url):
-                                raise CloseSpider('termination condition met')
-                    else:
-                        hr = (self.started_on - datetime(int(match.group(1)), int(match.group(2)), int(match.group(3)),
-                                                         int(match.group(4)), int(match.group(5))))
-                        if hr.days < 1:
-                            if (hr.seconds // 3600) > 6:
-                                raise CloseSpider('termination condition met')
-                        else:
-                            raise CloseSpider('termination condition met')
-                item['writer'] = link.xpath('./div/div[2]/span[3]/text()').extract()
-                item['title'] = link.xpath('./div/div[3]/h2/text()').extract()
-                rq = scrapy.Request(self.prefix + url[:url.find('&page')], callback=self.parse_post)
-                rq.meta['item'] = item
-                yield rq
-        self.i += 1
-        rq = scrapy.Request(self.postPage.format(self.i), callback=self.parse)
-        yield rq
+                item = {'date': link.xpath('./div/div[2]/span[2]/text()').extract_first(),
+                        'title': link.xpath('./div/div[3]/h2/text()').extract()}
+                self.url_list.append({'url': self.prefix + url[:url.find('&page')],
+                                      'item': item})
+        while True:
+            if not self.url_list:
+                return
+            tmp = self.url_list.pop(0)
+            if tmp['url'] not in self.visited_links:
+                next_url = tmp['url']
+                break
+        rq = scrapy.Request(url=next_url, callback=self.parse_post,
+                            meta={'item': tmp['item']})
+        return rq
 
     def parse_post(self, response):
-        print('paring post..', response.url)
+        print('parsing post..', response.url)
         i = ItemLoader(item=SpitzCrawlerItem(), response=response)
         item = response.meta['item']
         i.add_value('title', item['title'])
-        i.add_value('writer', item['writer'])
+        i.add_xpath('writer', '//*[@id="viewPageWriterNameSpan"]/@name')
+        i.add_xpath('writer', '/html/body/div[@class="view_spec"]//span[@class="view_writer_span"]//text()')
         i.add_xpath('content', '/html/body//div[@class="viewContent"]//text()')
         i.add_value('date', item['date'])
         i.add_xpath('pic', '/html/body//div[@class="viewContent"]//img/@src')
         i.add_value('url', response.url)
-        return i.load_item()
+        re_i = i.load_item()
+        match = self.r.search(re_i['date'])
+        if match:
+            if self.is_okay(response, match):
+                if self.url_list:
+                    tmp = self.url_list.pop(0)
+                    next_url = tmp['url']
+                    rq = scrapy.Request(url=next_url, callback=self.parse_post,
+                                        meta={'item': tmp['item'], 'reconnect': False})
+                    self.visited_links.add(next_url)
+                    return re_i, rq
+                else:
+                    self.i += 1
+                    rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
+                    rq.meta['reconnect'] = False
+                    return re_i, rq
+            else:
+                raise CloseSpider('termination condition met')
