@@ -63,7 +63,7 @@ class DachshundCrawlSpider(scrapy.Spider):
     def is_okay(self, response, match):
         if self.mode:
             for t_url in self.url:
-                if t_url in (self.prefix + response.url) and self.clubid in (self.prefix + response.url):
+                if t_url in response.url and self.clubid in response.url:
                     return False
             return True
         else:
@@ -103,7 +103,7 @@ class DachshundCrawlSpider(scrapy.Spider):
         return rq
 
     def parse_post(self, response):
-        print('paring post..', response.url)
+        print('parsing post..', response.url)
         i = ItemLoader(item=DachshundCrawlerItem(), response=response)
         item = response.meta['item']
         i.add_value('title', item['title'])

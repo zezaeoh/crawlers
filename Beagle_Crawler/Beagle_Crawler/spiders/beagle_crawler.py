@@ -58,7 +58,7 @@ class BeagleCrawlSpiderBbs(scrapy.Spider):
     def is_okay(self, response, match):
         if self.mode:
             for t_url in self.url:
-                if t_url in (self.prefix + response.url):
+                if t_url in response.url:
                     return False
             return True
         else:
@@ -92,7 +92,7 @@ class BeagleCrawlSpiderBbs(scrapy.Spider):
         return rq
 
     def parse_post(self, response):
-        print('paring post..', response.url)
+        print('parsing post..', response.url)
         i = ItemLoader(item=BeagleCrawlerItem(), response=response)
         item = response.meta['item']
         i.add_value('title', item['title'])
@@ -169,7 +169,7 @@ class BeagleCrawlSpiderEtcInfo(scrapy.Spider):
     def is_okay(self, response, match):
         if self.mode:
             for t_url in self.url:
-                if t_url in (self.prefix + response.url):
+                if t_url in response.url:
                     return False
             return True
         else:
@@ -203,7 +203,7 @@ class BeagleCrawlSpiderEtcInfo(scrapy.Spider):
         return rq
 
     def parse_post(self, response):
-        print('paring post..', response.url)
+        print('parsing post..', response.url)
         i = ItemLoader(item=BeagleCrawlerItem(), response=response)
         item = response.meta['item']
         i.add_value('title', item['title'])
@@ -281,7 +281,7 @@ class BeagleCrawlSpiderAppInfo(scrapy.Spider):
     def is_okay(self, response, match):
         if self.mode:
             for t_url in self.url:
-                if t_url in (self.prefix + response.url):
+                if t_url in response.url:
                     return False
             return True
         else:
@@ -315,7 +315,7 @@ class BeagleCrawlSpiderAppInfo(scrapy.Spider):
         return rq
 
     def parse_post(self, response):
-        print('paring post..', response.url)
+        print('parsing post..', response.url)
         i = ItemLoader(item=BeagleCrawlerItem(), response=response)
         item = response.meta['item']
         i.add_value('title', item['title'])
@@ -393,7 +393,7 @@ class BeagleCrawlSpiderPpomppu(scrapy.Spider):
     def is_okay(self, response, match):
         if self.mode:
             for t_url in self.url:
-                if t_url in (self.prefix + response.url):
+                if t_url in response.url:
                     return False
             return True
         else:
@@ -427,7 +427,7 @@ class BeagleCrawlSpiderPpomppu(scrapy.Spider):
         return rq
 
     def parse_post(self, response):
-        print('paring post..', response.url)
+        print('parsing post..', response.url)
         i = ItemLoader(item=BeagleCrawlerItem(), response=response)
         item = response.meta['item']
         i.add_value('title', item['title'])
