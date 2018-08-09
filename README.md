@@ -48,3 +48,10 @@
 ### how to use
 * $ scrapy crawl pointer_crawler
 * _현재 테스트중이므로 Json파일로만 저장됩니다._
+
+## Retriever_Crawler
+### spider
+* **retriever_crawler** : 루리웹 크롤링
+### how to use
+* $ scrapy crawl retriever_crawler -a board_id=<게시판 id>
+* _현재 테스트중이므로 Json파일로만 저장됩니다._
