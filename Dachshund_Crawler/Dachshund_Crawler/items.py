@@ -29,6 +29,10 @@ def filter_strip(v):
     return v.strip()
 
 
+def filter_pic(v):
+    return None if not v else v
+
+
 def filter_date(v):
     return [re.sub(r'(\d+)\.(\d+)\.(\d+)\. (\d+):(\d+)', r'\1-\2-\3 \4:\5', a)
             for a in re.findall(r'\d+\.\d+\.\d+\. \d+:\d+', v)]
@@ -56,6 +60,8 @@ class DachshundCrawlerItem(scrapy.Item):
     url = scrapy.Field(
         output_processor=Join()
     )  # 게시글 주소
-    pic = scrapy.Field()  # 사진
+    pic = scrapy.Field(
+        input_processor=MapCompose(filter_pic)
+    )  # 사진
     pass
 
