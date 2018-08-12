@@ -23,7 +23,7 @@ def filter_strip(v):
 
 def filter_pic(v):
     return None if not v else v
-	
+
 
 def filter_date(v):
     return re.findall(r'\d+-\d+-\d+ \d+:\d+:\d+', v)

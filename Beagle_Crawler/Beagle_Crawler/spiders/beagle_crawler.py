@@ -22,6 +22,7 @@ class BeagleCrawlSpiderBbs(scrapy.Spider):
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super(BeagleCrawlSpiderBbs, cls).from_crawler(crawler, *args, **kwargs)
         spider.started_on = datetime.now()
+        spider.visited_links = set()
         spider.r = re.compile(r'(\d+)-(\d+)-(\d+) (\d+):(\d+)')
         spider.p = re.compile(r'bbs_view\.php\?id=freeboard&no=.*')
         spider.prefix = 'http://m.ppomppu.co.kr/new/'
@@ -83,12 +84,19 @@ class BeagleCrawlSpiderBbs(scrapy.Spider):
                     self.furl.append(furl)
                 item = {'writer': link.xpath('./span[@class="ct"]/text()').extract(),
                         'title': link.xpath('./strong/text()').extract()}
-                self.url_list.append({'url': self.prefix + url,
+                self.url_list.append({'url': self.prefix + url[:url.find('&page')],
                                       'item': item})
-        tmp = self.url_list.pop(0)
-        next_url = tmp['url']
+        while True:
+            if not self.url_list:
+                print('page parsing error!!')
+                return
+            tmp = self.url_list.pop(0)
+            if tmp['url'] not in self.visited_links:
+                next_url = tmp['url']
+                break
         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                             meta={'item': tmp['item']})
+        self.visited_links.add(next_url)
         return rq
 
     def parse_post(self, response):
@@ -111,6 +119,7 @@ class BeagleCrawlSpiderBbs(scrapy.Spider):
                     next_url = tmp['url']
                     rq = scrapy.Request(url=next_url, callback=self.parse_post,
                                         meta={'item': tmp['item']})
+                    self.visited_links.add(next_url)
                     return re_i, rq
                 else:
                     self.i += 1
@@ -133,6 +142,7 @@ class BeagleCrawlSpiderEtcInfo(scrapy.Spider):
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super(BeagleCrawlSpiderEtcInfo, cls).from_crawler(crawler, *args, **kwargs)
         spider.started_on = datetime.now()
+        spider.visited_links = set()
         spider.r = re.compile(r'(\d+)-(\d+)-(\d+) (\d+):(\d+)')
         spider.p = re.compile(r'bbs_view\.php\?id=etc_info&no=.*')
         spider.prefix = 'http://m.ppomppu.co.kr/new/'
@@ -194,12 +204,19 @@ class BeagleCrawlSpiderEtcInfo(scrapy.Spider):
                     self.furl.append(furl)
                 item = {'writer': link.xpath('./span[@class="ct"]/text()').extract(),
                         'title': link.xpath('./strong/text()').extract()}
-                self.url_list.append({'url': self.prefix + url,
+                self.url_list.append({'url': self.prefix + url[:url.find('&page')],
                                       'item': item})
-        tmp = self.url_list.pop(0)
-        next_url = tmp['url']
+        while True:
+            if not self.url_list:
+                print('page parsing error!!')
+                return
+            tmp = self.url_list.pop(0)
+            if tmp['url'] not in self.visited_links:
+                next_url = tmp['url']
+                break
         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                             meta={'item': tmp['item']})
+        self.visited_links.add(next_url)
         return rq
 
     def parse_post(self, response):
@@ -223,6 +240,7 @@ class BeagleCrawlSpiderEtcInfo(scrapy.Spider):
                         next_url = tmp['url']
                         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                                             meta={'item': tmp['item']})
+                        self.visited_links.add(next_url)
                         return re_i, rq
                     else:
                         self.i += 1
@@ -245,6 +263,7 @@ class BeagleCrawlSpiderAppInfo(scrapy.Spider):
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super(BeagleCrawlSpiderAppInfo, cls).from_crawler(crawler, *args, **kwargs)
         spider.started_on = datetime.now()
+        spider.visited_links = set()
         spider.r = re.compile(r'(\d+)-(\d+)-(\d+) (\d+):(\d+)')
         spider.p = re.compile(r'bbs_view\.php\?id=ppomapp&no=.*')
         spider.prefix = 'http://m.ppomppu.co.kr/new/'
@@ -306,12 +325,19 @@ class BeagleCrawlSpiderAppInfo(scrapy.Spider):
                     self.furl.append(furl)
                 item = {'writer': link.xpath('./span[@class="ct"]/text()').extract(),
                         'title': link.xpath('./strong/text()').extract()}
-                self.url_list.append({'url': self.prefix + url,
+                self.url_list.append({'url': self.prefix + url[:url.find('&page')],
                                       'item': item})
-        tmp = self.url_list.pop(0)
-        next_url = tmp['url']
+        while True:
+            if not self.url_list:
+                print('page parsing error!!')
+                return
+            tmp = self.url_list.pop(0)
+            if tmp['url'] not in self.visited_links:
+                next_url = tmp['url']
+                break
         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                             meta={'item': tmp['item']})
+        self.visited_links.add(next_url)
         return rq
 
     def parse_post(self, response):
@@ -335,6 +361,7 @@ class BeagleCrawlSpiderAppInfo(scrapy.Spider):
                         next_url = tmp['url']
                         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                                             meta={'item': tmp['item']})
+                        self.visited_links.add(next_url)
                         return re_i, rq
                     else:
                         self.i += 1
@@ -357,6 +384,7 @@ class BeagleCrawlSpiderPpomppu(scrapy.Spider):
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super(BeagleCrawlSpiderPpomppu, cls).from_crawler(crawler, *args, **kwargs)
         spider.started_on = datetime.now()
+        spider.visited_links = set()
         spider.r = re.compile(r'(\d+)-(\d+)-(\d+) (\d+):(\d+)')
         spider.p = re.compile(r'bbs_view\.php\?id=ppomppu&no=.*')
         spider.prefix = 'http://m.ppomppu.co.kr/new/'
@@ -418,12 +446,19 @@ class BeagleCrawlSpiderPpomppu(scrapy.Spider):
                     self.furl.append(furl)
                 item = {'writer': link.xpath('./p[1]/span[2]/text()').extract(),
                         'title': link.xpath('./span[@class="title"]//text()').extract()}
-                self.url_list.append({'url': self.prefix + url,
+                self.url_list.append({'url': self.prefix + url[:url.find('&page')],
                                       'item': item})
-        tmp = self.url_list.pop(0)
-        next_url = tmp['url']
+        while True:
+            if not self.url_list:
+                print('page parsing error!!')
+                return
+            tmp = self.url_list.pop(0)
+            if tmp['url'] not in self.visited_links:
+                next_url = tmp['url']
+                break
         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                             meta={'item': tmp['item']})
+        self.visited_links.add(next_url)
         return rq
 
     def parse_post(self, response):
@@ -447,6 +482,7 @@ class BeagleCrawlSpiderPpomppu(scrapy.Spider):
                         next_url = tmp['url']
                         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                                             meta={'item': tmp['item']})
+                        self.visited_links.add(next_url)
                         return re_i, rq
                     else:
                         self.i += 1

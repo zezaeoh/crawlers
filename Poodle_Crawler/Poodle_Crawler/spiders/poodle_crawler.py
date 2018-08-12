@@ -38,6 +38,7 @@ class PoodleCrawlSpider(scrapy.Spider):
         spider = super(PoodleCrawlSpider, cls).from_crawler(crawler, **kwargs)
         spider.gall_id = gall_id
         spider.started_on = datetime.now()
+        spider.visited_links = set()
         spider.r = re.compile(r'(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)')
         spider.p = re.compile(r'/board/view/\?id={}&no=.*'.format(gall_id))
         spider.prefix = 'http://gall.dcinside.com'
@@ -101,15 +102,20 @@ class PoodleCrawlSpider(scrapy.Spider):
                     self.furl.append(furl)
                 item = {'writer': link.xpath('./td[@class="t_writer user_layer"]/@user_name').extract(),
                         'title': link.xpath('./td[@class="t_subject"]/a[1]/text()').extract()}
-                self.url_list.append({'url': self.prefix + url,
+                self.url_list.append({'url': self.prefix + url[:url.find('&page')],
                                       'item': item})
-        if not self.url_list:
-            time.sleep(3)
-            return scrapy.Request(url=response.url, dont_filter=True, callback=self.parse)
-        tmp = self.url_list.pop(0)
-        next_url = tmp['url']
+        while True:
+            if not self.url_list:
+                print('page parsing error!!')
+                time.sleep(3)
+                return scrapy.Request(url=response.url, dont_filter=True, callback=self.parse)
+            tmp = self.url_list.pop(0)
+            if tmp['url'] not in self.visited_links:
+                next_url = tmp['url']
+                break
         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                             meta={'item': tmp['item']})
+        self.visited_links.add(next_url)
         return rq
 
     def parse_post(self, response):
@@ -135,6 +141,7 @@ class PoodleCrawlSpider(scrapy.Spider):
                     next_url = tmp['url']
                     rq = scrapy.Request(url=next_url, callback=self.parse_post,
                                         meta={'item': tmp['item']})
+                    self.visited_links.add(next_url)
                     return re_i, rq
                 else:
                     self.i += 1
