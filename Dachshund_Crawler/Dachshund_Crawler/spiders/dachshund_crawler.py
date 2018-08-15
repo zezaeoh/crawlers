@@ -110,6 +110,7 @@ class DachshundCrawlSpider(scrapy.Spider):
         i.add_value('writer', item['writer'])
         i.add_xpath('content', '//*[@id="postContent"]//text()')
         i.add_xpath('date', '//*[@id="ct"]//span[@class="date font_l"]/text()')
+        i.add_xpath('date', '//*[@id="ct"]//span[@class="board_time"]//text()')
         i.add_xpath('date', '//*[@id="ct"]/div[@class="post "]/div[@class="post_info"]//text()')
         i.add_xpath('date', '//*[@id="ct"]/div[@class="post"]/div[@class="post_info"]//text()')
         i.add_xpath('pic', '//*[@id="postContent"]//img/@src')
