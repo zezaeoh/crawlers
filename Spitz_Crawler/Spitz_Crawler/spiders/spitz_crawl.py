@@ -12,7 +12,7 @@ class SpitzCrawlSpider(scrapy.Spider):
     name = 'spitz_crawler'
     custom_settings = {
         'ITEM_PIPELINES': {
-            'Spitz_Crawler.pipelines.DynamoDBPipeline': 400
+            'Spitz_Crawler.pipelines.RQPipeline': 400
         }
     }
     allowed_domains = ['m.todayhumor.co.kr']

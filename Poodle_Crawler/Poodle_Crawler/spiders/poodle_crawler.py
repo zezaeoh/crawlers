@@ -28,7 +28,7 @@ class PoodleCrawlSpider(scrapy.Spider):
     name = 'poodle_crawler'
     custom_settings = {
         'ITEM_PIPELINES': {
-            'Poodle_Crawler.pipelines.DynamoDBPipeline': 400
+            'Poodle_Crawler.pipelines.RQPipeline': 400
         }
     }
     allowed_domains = ['gall.dcinside.com']

@@ -16,7 +16,10 @@ NEWSPIDER_MODULE = 'Spitz_Crawler.spiders'
 LOG_LEVEL = 'ERROR'
 #LOG_STDOUT = True
 
-DYNAMODB_COMID = 100 #오늘의 유머
+DYNAMODB_COMID = 100  #오늘의 유머
+
+RQ_HOST = '13.209.200.84'
+RQ_PORT = 8888
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'Spitz_Crawler (+http://www.yourdomain.com)'

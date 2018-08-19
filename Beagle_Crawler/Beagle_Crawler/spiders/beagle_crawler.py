@@ -13,7 +13,7 @@ class BeagleCrawlSpiderBbs(scrapy.Spider):
     name = 'beagle_crawler_bbs'
     custom_settings = {
         'ITEM_PIPELINES': {
-            'Beagle_Crawler.pipelines.DynamoDBPipeline': 400
+            'Beagle_Crawler.pipelines.RQPipeline': 400
         }
     }
     allowed_domains = ['m.ppomppu.co.kr']
@@ -133,7 +133,7 @@ class BeagleCrawlSpiderEtcInfo(scrapy.Spider):
     name = 'beagle_crawler_etc_info'
     custom_settings = {
         'ITEM_PIPELINES': {
-            'Beagle_Crawler.pipelines.DynamoDBPipeline': 400
+            'Beagle_Crawler.pipelines.RQPipeline': 400
         }
     }
     allowed_domains = ['m.ppomppu.co.kr']
@@ -254,7 +254,7 @@ class BeagleCrawlSpiderAppInfo(scrapy.Spider):
     name = 'beagle_crawler_app_info'
     custom_settings = {
         'ITEM_PIPELINES': {
-            'Beagle_Crawler.pipelines.DynamoDBPipeline': 400
+            'Beagle_Crawler.pipelines.RQPipeline': 400
         }
     }
     allowed_domains = ['m.ppomppu.co.kr']
@@ -375,7 +375,7 @@ class BeagleCrawlSpiderPpomppu(scrapy.Spider):
     name = 'beagle_crawler_ppomppu'
     custom_settings = {
         'ITEM_PIPELINES': {
-            'Beagle_Crawler.pipelines.DynamoDBPipeline': 400
+            'Beagle_Crawler.pipelines.RQPipeline': 400
         }
     }
     allowed_domains = ['m.ppomppu.co.kr']

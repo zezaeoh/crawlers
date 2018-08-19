@@ -13,7 +13,7 @@ class DachshundCrawlSpider(scrapy.Spider):
     name = 'dachshund_crawler'
     custom_settings = {
         'ITEM_PIPELINES': {
-            'Dachshund_Crawler.pipelines.DynamoDBPipeline': 400
+            'Dachshund_Crawler.pipelines.RQPipeline': 400
         }
     }
     allowed_domains = ['m.cafe.naver.com']
