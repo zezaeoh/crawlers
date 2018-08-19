@@ -3,7 +3,8 @@
 ## depndency
 1. scrapy
 2. selenium (phantom.js)
-3. boto3
+3. redis
+4. rq
 
 ## log
 * unix계열 /var/log/ 아래에 생성 **로그정보가 없을시 6시간정도의 데이터를 크롤링**
