@@ -9,8 +9,8 @@
 * unix계열 /var/log/ 아래에 생성 **로그정보가 없을시 6시간정도의 데이터를 크롤링**
 
 ## Item Pipeline
-* 현재 boto3 lib을 이용하여 aws DynamoDB에 연결 되어있으므로 똑같은 형식으로 사용하려면 ~/.aws 에 credential 파일 생성 후 사용가능
-* $ aws configure **(aws cli가 설치 되어있다는 가정하에)**
+* RQPipeline : rq서버로 crawling한 item을 전달 (rq서버에서 데이터 저장 담당)
+* JsonPipeline : 각 크롤러의 프로젝트 폴더 아래에 crawling한 data를 json 파일로 저장 (test용)
 
 ## Spitz_Crawler
 ### spider
