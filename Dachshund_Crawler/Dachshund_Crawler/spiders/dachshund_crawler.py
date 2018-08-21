@@ -79,6 +79,7 @@ class DachshundCrawlSpider(scrapy.Spider):
 
     def parse(self, response):
         self.url_list = []
+        flag = False
         for link in response.xpath('//*[@id="articleListArea"]/ul//li'):
             url = link.xpath('./a[1]/@href').extract_first()
             match = self.p.search(url)
@@ -92,11 +93,19 @@ class DachshundCrawlSpider(scrapy.Spider):
                                       'item': item})
         while True:
             if not self.url_list:
-                return
+                if flag:
+                    self.i += 1
+                    rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
+                    rq.meta['reconnect'] = False
+                    return rq
+                else:
+                    print('page parsing error!!')
+                    return
             tmp = self.url_list.pop(0)
             if tmp['url'] not in self.visited_links:
                 next_url = tmp['url']
                 break
+            flag = True
         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                             meta={'item': tmp['item'], 'reconnect': False})
         self.visited_links.add(next_url)

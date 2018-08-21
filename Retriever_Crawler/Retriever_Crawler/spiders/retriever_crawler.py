@@ -92,6 +92,7 @@ class RetrieverCrawlSpider(scrapy.Spider):
 
     def parse(self, response):
         self.url_list = []
+        flag = False
         for link in response.xpath('//table[@class="board_list_table"]/tbody//tr[@class="table_body"]'):
             url = link.xpath('./td[@class="subject"]/div[@class="title row"]/a[@class="subject_link deco"]/@href').extract_first()
             if self.p.search(url):
@@ -106,12 +107,18 @@ class RetrieverCrawlSpider(scrapy.Spider):
                                       'item': item})
         while True:
             if not self.url_list:
-                print('page parsing error!!')
-                return
+                if flag:
+                    self.i += 1
+                    rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
+                    return rq
+                else:
+                    print('page parsing error!!')
+                    return
             tmp = self.url_list.pop(0)
             if tmp['url'] not in self.visited_links:
                 next_url = tmp['url']
                 break
+            flag = True
         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                             meta={'item': tmp['item']})
         self.visited_links.add(next_url)

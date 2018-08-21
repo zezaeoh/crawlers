@@ -75,6 +75,7 @@ class PointerCrawlSpider(scrapy.Spider):
 
     def parse(self, response):
         self.url_list = []
+        flag = False
         for link in response.xpath('/html/body/div[@class="nav_container"]/div[@class="content_list"]//div[@class="list_item symph-row"]'):
             url = link.xpath('./div[@class="list_title"]/a[@class="list_subject"]/@href').extract_first()
             if self.p.search(url):
@@ -89,11 +90,18 @@ class PointerCrawlSpider(scrapy.Spider):
                                       'item': item})
         while True:
             if not self.url_list:
-                return
+                if flag:
+                    self.i += 1
+                    rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
+                    return rq
+                else:
+                    print('page parsing error!!')
+                    return
             tmp = self.url_list.pop(0)
             if tmp['url'] not in self.visited_links:
                 next_url = tmp['url']
                 break
+            flag = True
         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                             meta={'item': tmp['item']})
         self.visited_links.add(next_url)

@@ -91,6 +91,7 @@ class PoodleCrawlSpider(scrapy.Spider):
 
     def parse(self, response):
         self.url_list = []
+        flag = False
         for link in response.xpath('//tbody[@class="list_tbody"]//tr[@class="tb"]'):
             if link.xpath('./td[@class="t_notice"]/text()').extract_first() == '공지':
                 continue
@@ -106,13 +107,19 @@ class PoodleCrawlSpider(scrapy.Spider):
                                       'item': item})
         while True:
             if not self.url_list:
-                print('page parsing error!!')
-                time.sleep(3)
-                return scrapy.Request(url=response.url, dont_filter=True, callback=self.parse)
+                if flag:
+                    self.i += 1
+                    rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
+                    return rq
+                else:
+                    print('page parsing error!!')
+                    time.sleep(3)
+                    return scrapy.Request(url=response.url, dont_filter=True, callback=self.parse)
             tmp = self.url_list.pop(0)
             if tmp['url'] not in self.visited_links:
                 next_url = tmp['url']
                 break
+            flag = True
         rq = scrapy.Request(url=next_url, callback=self.parse_post,
                             meta={'item': tmp['item']})
         self.visited_links.add(next_url)
