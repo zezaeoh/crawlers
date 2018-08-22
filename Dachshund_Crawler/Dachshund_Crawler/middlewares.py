@@ -1,4 +1,4 @@
-from scrapy import signals, Request
+from scrapy import signals
 from selenium import webdriver
 from scrapy.http import HtmlResponse
 from selenium.webdriver.common.keys import Keys
@@ -58,18 +58,8 @@ class JavaScriptMiddleware(object):
         if self.retry > 10:
             raise CloseSpider('max retries exceeded!')
         print("move to next url")
-        if spider.url_list:
-            tmp = spider.url_list.pop(0)
-            next_url = tmp['url']
-            rq = spider.Request(url=next_url, callback=spider.parse_post,
-                                meta={'item': tmp['item'], 'reconnect': False})
-            spider.visited_links.add(next_url)
-            return rq
-        else:
-            spider.i += 1
-            rq = spider.Request(spider.postPage.format(spider.i), dont_filter=True, callback=spider.parse)
-            rq.meta['reconnect'] = False
-            return rq
+        rq = spider.get_filtered_request()
+        return rq
 
     def spider_closed(self, spider):
         self.driver.quit()

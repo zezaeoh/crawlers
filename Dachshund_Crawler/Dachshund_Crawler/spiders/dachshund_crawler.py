@@ -31,6 +31,7 @@ class DachshundCrawlSpider(scrapy.Spider):
         spider.prefix = 'https://m.cafe.naver.com'
         spider.postPage = 'https://m.cafe.naver.com/ArticleList.nhn?search.clubid=10298136&search.page={}'
         spider.i = 1
+        spider.url_list = []
         if os.path.isfile('/var/log/{}.log'.format(cls.name)):
             with open('/var/log/{}.log'.format(cls.name), mode='rt', encoding='utf-8') as f:
                 s = f.read()
@@ -77,9 +78,28 @@ class DachshundCrawlSpider(scrapy.Spider):
             else:
                 return False
 
+    def get_filtered_request(self, is_parse=False):
+        if is_parse and not self.url_list:
+            print('parsing page error!')
+            raise CloseSpider('parsing page error!')
+        while True:
+            if not self.url_list:
+                self.i += 1
+                rq = scrapy.Request(self.postPage.format(self.i), callback=self.parse)
+                rq.meta['reconnect'] = False
+                return rq
+            tmp = self.url_list.pop(0)
+            if tmp['url'] not in self.visited_links:
+                next_url = tmp['url']
+                break
+        rq = scrapy.Request(url=next_url, callback=self.parse_post,
+                            meta={'item': tmp['item']})
+        rq.meta['reconnect'] = False
+        self.visited_links.add(next_url)
+        return rq
+
     def parse(self, response):
-        self.url_list = []
-        flag = False
+        self.url_list.clear()
         for link in response.xpath('//*[@id="articleListArea"]/ul//li'):
             url = link.xpath('./a[1]/@href').extract_first()
             match = self.p.search(url)
@@ -91,24 +111,7 @@ class DachshundCrawlSpider(scrapy.Spider):
                         'title': link.xpath('./a[1]/strong[@class="tit"]/text()').extract()}
                 self.url_list.append({'url': self.prefix + self.article.format(match.group(1)),
                                       'item': item})
-        while True:
-            if not self.url_list:
-                if flag:
-                    self.i += 1
-                    rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
-                    rq.meta['reconnect'] = False
-                    return rq
-                else:
-                    print('page parsing error!!')
-                    return
-            tmp = self.url_list.pop(0)
-            if tmp['url'] not in self.visited_links:
-                next_url = tmp['url']
-                break
-            flag = True
-        rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                            meta={'item': tmp['item'], 'reconnect': False})
-        self.visited_links.add(next_url)
+        rq = self.get_filtered_request(is_parse=True)
         return rq
 
     def parse_post(self, response):
@@ -131,36 +134,16 @@ class DachshundCrawlSpider(scrapy.Spider):
             for a in tmp:
                 if '카페 멤버만 볼 수 있습니다.' in a:
                     print('try reconnection')
-                    rq = scrapy.Request(url=response.url, callback=self.parse_post, dont_filter=True,
+                    rq = scrapy.Request(url=response.url, callback=self.parse_post,
                                         meta={'item': item, 'reconnect': True})
                     return rq
             print('move on to next url')
-            if self.url_list:
-                tmp = self.url_list.pop(0)
-                next_url = tmp['url']
-                rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                                    meta={'item': tmp['item'], 'reconnect': False})
-                self.visited_links.add(next_url)
-                return rq
-            else:
-                self.i += 1
-                rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
-                rq.meta['reconnect'] = False
-                return rq
+            return self.get_filtered_request()
         match = self.r.search(re_i['date'])
         if match:
             if self.is_okay(response, match):
-                if self.url_list:
-                    tmp = self.url_list.pop(0)
-                    next_url = tmp['url']
-                    rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                                        meta={'item': tmp['item'], 'reconnect': False})
-                    self.visited_links.add(next_url)
-                    return re_i, rq
-                else:
-                    self.i += 1
-                    rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
-                    rq.meta['reconnect'] = False
-                    return re_i, rq
+                rq = self.get_filtered_request()
+                return re_i, rq
             else:
+                print('termination condition met')
                 raise CloseSpider('termination condition met')
