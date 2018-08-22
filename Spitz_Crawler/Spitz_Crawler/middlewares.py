@@ -1,4 +1,4 @@
-from scrapy import signals, Request
+from scrapy import signals
 from selenium import webdriver
 from scrapy.http import HtmlResponse
 from scrapy.exceptions import CloseSpider
@@ -19,7 +19,7 @@ class JavaScriptMiddleware(object):
     def process_request(self, request, spider):
         print("rendering...")
         self.driver.get(request.url)
-        time.sleep(1)
+        time.sleep(3)
         body = self.driver.page_source.encode('utf-8')
         print("parsing... " + request.url)
         self.retry = 0
@@ -35,17 +35,8 @@ class JavaScriptMiddleware(object):
         if self.retry > 10:
             raise CloseSpider('max retries exceeded!')
         print("move to next url")
-        if spider.url_list:
-            tmp = spider.url_list.pop(0)
-            next_url = tmp['url']
-            rq = Request(url=next_url, callback=spider.parse_post,
-                                meta={'item': tmp['item']})
-            spider.visited_links.add(next_url)
-            return rq
-        else:
-            spider.i += 1
-            rq = Request(spider.postPage.format(spider.i), dont_filter=True, callback=spider.parse)
-            return rq
+        rq = spider.get_filtered_request()
+        return rq
 
     def spider_closed(self, spider):
         self.driver.quit()
