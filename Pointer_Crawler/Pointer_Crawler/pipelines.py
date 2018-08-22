@@ -22,7 +22,7 @@ class RQPipeline(object):
         return item
 
     def close_spider(self, spider):
-	    self.q.enqueue('workFunctions.process_main', self.table_name, result_ttl=0)
+        self.q.enqueue('workFunctions.process_main', self.table_name, result_ttl=0)
         print('rq connection over')
 
 
