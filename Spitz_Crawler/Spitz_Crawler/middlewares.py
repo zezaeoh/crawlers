@@ -19,7 +19,7 @@ class JavaScriptMiddleware(object):
     def process_request(self, request, spider):
         print("rendering...")
         self.driver.get(request.url)
-        time.sleep(3)
+        time.sleep(1)
         body = self.driver.page_source.encode('utf-8')
         print("parsing... " + request.url)
         self.retry = 0
