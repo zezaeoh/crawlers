@@ -28,6 +28,7 @@ class BeagleCrawlSpiderBbs(scrapy.Spider):
         spider.prefix = 'http://m.ppomppu.co.kr/new/'
         spider.postPage = 'http://m.ppomppu.co.kr/new/bbs_list.php?id=freeboard&page={}'
         spider.i = 1
+        spider.url_list = []
         if os.path.isfile('/var/log/{}.log'.format(cls.name)):
             with open('/var/log/{}.log'.format(cls.name), mode='rt', encoding='utf-8') as f:
                 s = f.read()
@@ -73,9 +74,26 @@ class BeagleCrawlSpiderBbs(scrapy.Spider):
             else:
                 return False
 
+    def get_filtered_request(self, is_parse=False):
+        if is_parse and not self.url_list:
+            print('parsing page error!')
+            raise CloseSpider('parsing page error!')
+        while True:
+            if not self.url_list:
+                self.i += 1
+                rq = scrapy.Request(self.postPage.format(self.i), callback=self.parse)
+                return rq
+            tmp = self.url_list.pop(0)
+            if tmp['url'] not in self.visited_links:
+                next_url = tmp['url']
+                break
+        rq = scrapy.Request(url=next_url, callback=self.parse_post,
+                            meta={'item': tmp['item']})
+        self.visited_links.add(next_url)
+        return rq
+
     def parse(self, response):
-        self.url_list = []
-        flag = False
+        self.url_list.clear()
         for link in response.xpath('//ul[@class="bbsList"]//a'):
             url = link.xpath('./@href').extract_first()
             if self.p.search(url):
@@ -87,23 +105,7 @@ class BeagleCrawlSpiderBbs(scrapy.Spider):
                         'title': link.xpath('./strong/text()').extract()}
                 self.url_list.append({'url': self.prefix + url[:url.find('&page')],
                                       'item': item})
-        while True:
-            if not self.url_list:
-                if flag:
-                    self.i += 1
-                    rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
-                    return rq
-                else:
-                    print('page parsing error!!')
-                    return
-            tmp = self.url_list.pop(0)
-            if tmp['url'] not in self.visited_links:
-                next_url = tmp['url']
-                break
-            flag = True
-        rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                            meta={'item': tmp['item']})
-        self.visited_links.add(next_url)
+        rq = self.get_filtered_request(is_parse=True)
         return rq
 
     def parse_post(self, response):
@@ -121,18 +123,10 @@ class BeagleCrawlSpiderBbs(scrapy.Spider):
         match = self.r.search(re_i['date'])
         if match:
             if self.is_okay(response, match):
-                if self.url_list:
-                    tmp = self.url_list.pop(0)
-                    next_url = tmp['url']
-                    rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                                        meta={'item': tmp['item']})
-                    self.visited_links.add(next_url)
-                    return re_i, rq
-                else:
-                    self.i += 1
-                    rq = scrapy.Request(self.postPage.format(self.i), callback=self.parse)
-                    return re_i, rq
+                rq = self.get_filtered_request()
+                return re_i, rq
             else:
+                print('termination condition met')
                 raise CloseSpider('termination condition met')
 
 
@@ -155,6 +149,7 @@ class BeagleCrawlSpiderEtcInfo(scrapy.Spider):
         spider.prefix = 'http://m.ppomppu.co.kr/new/'
         spider.postPage = 'http://m.ppomppu.co.kr/new/bbs_list.php?id=etc_info&page={}'
         spider.i = 1
+        spider.url_list = []
         if os.path.isfile('/var/log/{}.log'.format(cls.name)):
             with open('/var/log/{}.log'.format(cls.name), mode='rt', encoding='utf-8') as f:
                 s = f.read()
@@ -200,9 +195,26 @@ class BeagleCrawlSpiderEtcInfo(scrapy.Spider):
             else:
                 return False
 
+    def get_filtered_request(self, is_parse=False):
+        if is_parse and not self.url_list:
+            print('parsing page error!')
+            raise CloseSpider('parsing page error!')
+        while True:
+            if not self.url_list:
+                self.i += 1
+                rq = scrapy.Request(self.postPage.format(self.i), callback=self.parse)
+                return rq
+            tmp = self.url_list.pop(0)
+            if tmp['url'] not in self.visited_links:
+                next_url = tmp['url']
+                break
+        rq = scrapy.Request(url=next_url, callback=self.parse_post,
+                            meta={'item': tmp['item']})
+        self.visited_links.add(next_url)
+        return rq
+
     def parse(self, response):
-        self.url_list = []
-        flag = False
+        self.url_list.clear()
         for link in response.xpath('//ul[@class="bbsList"]//a'):
             url = link.xpath('./@href').extract_first()
             if self.p.search(url):
@@ -214,23 +226,7 @@ class BeagleCrawlSpiderEtcInfo(scrapy.Spider):
                         'title': link.xpath('./strong/text()').extract()}
                 self.url_list.append({'url': self.prefix + url[:url.find('&page')],
                                       'item': item})
-        while True:
-            if not self.url_list:
-                if flag:
-                    self.i += 1
-                    rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
-                    return rq
-                else:
-                    print('page parsing error!!')
-                    return
-            tmp = self.url_list.pop(0)
-            if tmp['url'] not in self.visited_links:
-                next_url = tmp['url']
-                break
-            flag = True
-        rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                            meta={'item': tmp['item']})
-        self.visited_links.add(next_url)
+        rq = self.get_filtered_request(is_parse=True)
         return rq
 
     def parse_post(self, response):
@@ -249,18 +245,10 @@ class BeagleCrawlSpiderEtcInfo(scrapy.Spider):
         if match:
             if match:
                 if self.is_okay(response, match):
-                    if self.url_list:
-                        tmp = self.url_list.pop(0)
-                        next_url = tmp['url']
-                        rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                                            meta={'item': tmp['item']})
-                        self.visited_links.add(next_url)
-                        return re_i, rq
-                    else:
-                        self.i += 1
-                        rq = scrapy.Request(self.postPage.format(self.i), callback=self.parse)
-                        return re_i, rq
+                    rq = self.get_filtered_request()
+                    return re_i, rq
                 else:
+                    print('termination condition met')
                     raise CloseSpider('termination condition met')
 
 
@@ -283,6 +271,7 @@ class BeagleCrawlSpiderAppInfo(scrapy.Spider):
         spider.prefix = 'http://m.ppomppu.co.kr/new/'
         spider.postPage = 'http://m.ppomppu.co.kr/new/bbs_list.php?id=ppomapp&page={}'
         spider.i = 1
+        spider.url_list = []
         if os.path.isfile('/var/log/{}.log'.format(cls.name)):
             with open('/var/log/{}.log'.format(cls.name), mode='rt', encoding='utf-8') as f:
                 s = f.read()
@@ -328,9 +317,26 @@ class BeagleCrawlSpiderAppInfo(scrapy.Spider):
             else:
                 return False
 
+    def get_filtered_request(self, is_parse=False):
+        if is_parse and not self.url_list:
+            print('parsing page error!')
+            raise CloseSpider('parsing page error!')
+        while True:
+            if not self.url_list:
+                self.i += 1
+                rq = scrapy.Request(self.postPage.format(self.i), callback=self.parse)
+                return rq
+            tmp = self.url_list.pop(0)
+            if tmp['url'] not in self.visited_links:
+                next_url = tmp['url']
+                break
+        rq = scrapy.Request(url=next_url, callback=self.parse_post,
+                            meta={'item': tmp['item']})
+        self.visited_links.add(next_url)
+        return rq
+
     def parse(self, response):
-        self.url_list = []
-        flag = False
+        self.url_list.clear()
         for link in response.xpath('//ul[@class="bbsList"]//a'):
             url = link.xpath('./@href').extract_first()
             if self.p.search(url):
@@ -342,23 +348,7 @@ class BeagleCrawlSpiderAppInfo(scrapy.Spider):
                         'title': link.xpath('./strong/text()').extract()}
                 self.url_list.append({'url': self.prefix + url[:url.find('&page')],
                                       'item': item})
-        while True:
-            if not self.url_list:
-                if flag:
-                    self.i += 1
-                    rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
-                    return rq
-                else:
-                    print('page parsing error!!')
-                    return
-            tmp = self.url_list.pop(0)
-            if tmp['url'] not in self.visited_links:
-                next_url = tmp['url']
-                break
-            flag = True
-        rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                            meta={'item': tmp['item']})
-        self.visited_links.add(next_url)
+        rq = self.get_filtered_request(is_parse=True)
         return rq
 
     def parse_post(self, response):
@@ -377,18 +367,10 @@ class BeagleCrawlSpiderAppInfo(scrapy.Spider):
         if match:
             if match:
                 if self.is_okay(response, match):
-                    if self.url_list:
-                        tmp = self.url_list.pop(0)
-                        next_url = tmp['url']
-                        rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                                            meta={'item': tmp['item']})
-                        self.visited_links.add(next_url)
-                        return re_i, rq
-                    else:
-                        self.i += 1
-                        rq = scrapy.Request(self.postPage.format(self.i), callback=self.parse)
-                        return re_i, rq
+                    rq = self.get_filtered_request()
+                    return re_i, rq
                 else:
+                    print('termination condition met')
                     raise CloseSpider('termination condition met')
 
 
@@ -411,6 +393,7 @@ class BeagleCrawlSpiderPpomppu(scrapy.Spider):
         spider.prefix = 'http://m.ppomppu.co.kr/new/'
         spider.postPage = 'http://m.ppomppu.co.kr/new/bbs_list.php?id=ppomppu&page={}'
         spider.i = 1
+        spider.url_list = []
         if os.path.isfile('/var/log/{}.log'.format(cls.name)):
             with open('/var/log/{}.log'.format(cls.name), mode='rt', encoding='utf-8') as f:
                 s = f.read()
@@ -456,9 +439,26 @@ class BeagleCrawlSpiderPpomppu(scrapy.Spider):
             else:
                 return False
 
+    def get_filtered_request(self, is_parse=False):
+        if is_parse and not self.url_list:
+            print('parsing page error!')
+            raise CloseSpider('parsing page error!')
+        while True:
+            if not self.url_list:
+                self.i += 1
+                rq = scrapy.Request(self.postPage.format(self.i), callback=self.parse)
+                return rq
+            tmp = self.url_list.pop(0)
+            if tmp['url'] not in self.visited_links:
+                next_url = tmp['url']
+                break
+        rq = scrapy.Request(url=next_url, callback=self.parse_post,
+                            meta={'item': tmp['item']})
+        self.visited_links.add(next_url)
+        return rq
+
     def parse(self, response):
-        self.url_list = []
-        flag = False
+        self.url_list.clear()
         for link in response.xpath('//ul[@class="bbsList"]//a'):
             url = link.xpath('./@href').extract_first()
             if self.p.search(url):
@@ -470,23 +470,7 @@ class BeagleCrawlSpiderPpomppu(scrapy.Spider):
                         'title': link.xpath('./span[@class="title"]//text()').extract()}
                 self.url_list.append({'url': self.prefix + url[:url.find('&page')],
                                       'item': item})
-        while True:
-            if not self.url_list:
-                if flag:
-                    self.i += 1
-                    rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
-                    return rq
-                else:
-                    print('page parsing error!!')
-                    return
-            tmp = self.url_list.pop(0)
-            if tmp['url'] not in self.visited_links:
-                next_url = tmp['url']
-                break
-            flag = True
-        rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                            meta={'item': tmp['item']})
-        self.visited_links.add(next_url)
+        rq = self.get_filtered_request(is_parse=True)
         return rq
 
     def parse_post(self, response):
@@ -505,16 +489,8 @@ class BeagleCrawlSpiderPpomppu(scrapy.Spider):
         if match:
             if match:
                 if self.is_okay(response, match):
-                    if self.url_list:
-                        tmp = self.url_list.pop(0)
-                        next_url = tmp['url']
-                        rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                                            meta={'item': tmp['item']})
-                        self.visited_links.add(next_url)
-                        return re_i, rq
-                    else:
-                        self.i += 1
-                        rq = scrapy.Request(self.postPage.format(self.i), callback=self.parse)
-                        return re_i, rq
+                    rq = self.get_filtered_request()
+                    return re_i, rq
                 else:
+                    print('termination condition met')
                     raise CloseSpider('termination condition met')

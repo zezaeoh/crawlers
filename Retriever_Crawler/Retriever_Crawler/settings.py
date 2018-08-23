@@ -20,6 +20,8 @@ DYNAMODB_COMID = 600  # 루리웹
 RQ_HOST = '13.209.200.84'
 RQ_PORT = 8888
 
+DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'Retriever_Crawler (+http://www.yourdomain.com)'
 
