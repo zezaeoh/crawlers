@@ -27,8 +27,8 @@ class SpitzCrawlSpider(scrapy.Spider):
         spider.prefix = 'http://m.todayhumor.co.kr/'
         spider.postPage = 'http://m.todayhumor.co.kr/list.php?table=total&page={}'
         spider.i = 1
-        if os.path.isfile('/var/log/{}.log'.format(cls.name)):
-            with open('/var/log/{}.log'.format(cls.name), mode='rt', encoding='utf-8') as f:
+        if os.path.isfile('/var/log/spitz_crawler.log'):
+            with open('/var/log/spitz_crawler.log', mode='rt', encoding='utf-8') as f:
                 s = f.read()
                 if s:
                     spider.mode = True
@@ -46,7 +46,7 @@ class SpitzCrawlSpider(scrapy.Spider):
         return spider
 
     def spider_closed(self, spider):
-        with open('/var/log/{}.log'.format(self.name), mode='wt', encoding='utf-8') as f:
+        with open('/var/log/spitz_crawler.log', mode='wt', encoding='utf-8') as f:
             f.write(' '.join(spider.furl))
         print('Work time:', datetime.now() - spider.started_on)
 
