@@ -17,8 +17,9 @@
 ### spider
 * **spitz_crawler** : 오늘의 유머 크롤링
 ### how to use
-* $ scrapy crawl spitz_crawler
-
+```
+  $ scrapy crawl spitz_crawler
+```
 ## Beagle_Crawler
 ### spider
 * **beagle_crawler_bbs** : 뽐뿌 자유게시판 크롤링
@@ -26,33 +27,40 @@
 * **beagle_crawler_app_info** : 뽐뿌 앱정보 게시판 크롤링
 * **beagle_crawler_ppomppu** : 뽐뿌 뽐뿌게시판 크롤링
 ### how to use
-* $ scrapy crawl beagle_crawler_bbs
-* $ scrapy crawl beagle_crawler_etc_info
-* $ scrapy crawl beagle_crawler_app_info
-* $ scrapy crawl beagle_crawler_ppomppu
-
+```
+  $ scrapy crawl beagle_crawler_bbs
+  $ scrapy crawl beagle_crawler_etc_info
+  $ scrapy crawl beagle_crawler_app_info
+  $ scrapy crawl beagle_crawler_ppomppu
+```
 ## Poodle_Crawler
 ### spider
 * **poodle_crawler** : dcinside 크롤링
 ### how to use
-* $ scrapy crawl poodle_crawler -a gall_id=<갤러리 id>
-
+```
+  $ scrapy crawl poodle_crawler -a gall_id=<갤러리 id>
+```
 ## Dachshund_Crawler
 ### spider
 * **dachshund_crawler** : 네이버카페 레몬테라스 크롤링
 ### how to use
-* $ scrapy crawl dachshund_crawler
-
+```
+  * $ scrapy crawl dachshund_crawler
+```
 ## Pointer_Crawler
 ### spider
 * **pointer_crawler** : 클리앙 크롤링
 ### how to use
-* $ scrapy crawl pointer_crawler
+```
+  $ scrapy crawl pointer_crawler
+```
 * _현재 테스트중이므로 Json파일로만 저장됩니다._
 
 ## Retriever_Crawler
 ### spider
 * **retriever_crawler** : 루리웹 크롤링
 ### how to use
-* $ scrapy crawl retriever_crawler -a board_id=<게시판 id>
+```
+  $ scrapy crawl retriever_crawler -a board_id=<게시판 id>
+```
 * _현재 테스트중이므로 Json파일로만 저장됩니다._
