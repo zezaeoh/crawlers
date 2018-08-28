@@ -1,8 +1,9 @@
-from scrapy import signals, Request
+from scrapy import signals
 from selenium import webdriver
 from scrapy.http import HtmlResponse
 from selenium.webdriver.common.keys import Keys
 from scrapy.exceptions import CloseSpider
+from selenium.common.exceptions import TimeoutException
 
 import time
 
@@ -17,6 +18,7 @@ class JavaScriptMiddleware(object):
         s.usr_id = "newsdog620"
         s.pw = "shiba620"
         s.driver = webdriver.PhantomJS()
+        s.driver.set_page_load_timeout(10)
 
         s.driver.get("https://nid.naver.com/nidlogin.login")
         elem = s.driver.find_element_by_id("id")
@@ -41,7 +43,11 @@ class JavaScriptMiddleware(object):
             time.sleep(1)
             print('reconnect okay')
         print("rendering...")
-        self.driver.get(request.url)
+        try:
+            self.driver.get(request.url)
+        except TimeoutException:
+            print('time out! rendering restart')
+            return request
         time.sleep(1)
         body = self.driver.page_source.encode('utf-8')
         print("parsing... " + request.url)
@@ -58,18 +64,8 @@ class JavaScriptMiddleware(object):
         if self.retry > 10:
             raise CloseSpider('max retries exceeded!')
         print("move to next url")
-        if spider.url_list:
-            tmp = spider.url_list.pop(0)
-            next_url = tmp['url']
-            rq = spider.Request(url=next_url, callback=spider.parse_post,
-                                meta={'item': tmp['item'], 'reconnect': False})
-            spider.visited_links.add(next_url)
-            return rq
-        else:
-            spider.i += 1
-            rq = spider.Request(spider.postPage.format(spider.i), dont_filter=True, callback=spider.parse)
-            rq.meta['reconnect'] = False
-            return rq
+        rq = spider.get_filtered_request()
+        return rq
 
     def spider_closed(self, spider):
         self.driver.quit()

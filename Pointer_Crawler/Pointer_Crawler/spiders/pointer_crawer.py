@@ -28,6 +28,7 @@ class PointerCrawlSpider(scrapy.Spider):
         spider.prefix = 'https://m.clien.net'
         spider.postPage = 'https://m.clien.net/service/group/clien_all?&od=T31&po={}'
         spider.i = 0
+        spider.url_list = []
         if os.path.isfile('/var/log/{}.log'.format(cls.name)):
             with open('/var/log/{}.log'.format(cls.name), mode='rt', encoding='utf-8') as f:
                 s = f.read()
@@ -73,9 +74,26 @@ class PointerCrawlSpider(scrapy.Spider):
             else:
                 return False
 
+    def get_filtered_request(self, is_parse=False):
+        if is_parse and not self.url_list:
+            print('parsing page error!')
+            raise CloseSpider('parsing page error!')
+        while True:
+            if not self.url_list:
+                self.i += 1
+                rq = scrapy.Request(self.postPage.format(self.i), callback=self.parse)
+                return rq
+            tmp = self.url_list.pop(0)
+            if tmp['url'] not in self.visited_links:
+                next_url = tmp['url']
+                break
+        rq = scrapy.Request(url=next_url, callback=self.parse_post,
+                            meta={'item': tmp['item']})
+        self.visited_links.add(next_url)
+        return rq
+
     def parse(self, response):
-        self.url_list = []
-        flag = False
+        self.url_list.clear()
         for link in response.xpath('/html/body/div[@class="nav_container"]/div[@class="content_list"]//div[@class="list_item symph-row"]'):
             url = link.xpath('./div[@class="list_title"]/a[@class="list_subject"]/@href').extract_first()
             if self.p.search(url):
@@ -88,23 +106,7 @@ class PointerCrawlSpider(scrapy.Spider):
                 }
                 self.url_list.append({'url': self.prefix + url[:url.find('?')],
                                       'item': item})
-        while True:
-            if not self.url_list:
-                if flag:
-                    self.i += 1
-                    rq = scrapy.Request(self.postPage.format(self.i), dont_filter=True, callback=self.parse)
-                    return rq
-                else:
-                    print('page parsing error!!')
-                    return
-            tmp = self.url_list.pop(0)
-            if tmp['url'] not in self.visited_links:
-                next_url = tmp['url']
-                break
-            flag = True
-        rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                            meta={'item': tmp['item']})
-        self.visited_links.add(next_url)
+        rq = self.get_filtered_request(is_parse=True)
         return rq
 
     def parse_post(self, response):
@@ -122,16 +124,8 @@ class PointerCrawlSpider(scrapy.Spider):
         match = self.r.search(re_i['date'])
         if match:
             if self.is_okay(response, match):
-                if self.url_list:
-                    tmp = self.url_list.pop(0)
-                    next_url = tmp['url']
-                    rq = scrapy.Request(url=next_url, callback=self.parse_post,
-                                        meta={'item': tmp['item']})
-                    self.visited_links.add(next_url)
-                    return re_i, rq
-                else:
-                    self.i += 1
-                    rq = scrapy.Request(self.postPage.format(self.i), callback=self.parse)
-                    return re_i, rq
+                rq = self.get_filtered_request()
+                return re_i, rq
             else:
+                print('termination condition met')
                 raise CloseSpider('termination condition met')
