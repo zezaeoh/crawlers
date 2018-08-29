@@ -5,7 +5,11 @@ from scrapy.loader.processors import MapCompose, Join, TakeFirst
 filter_list = [
     'http',
     'https',
-    'adsbygoogle'
+    'www.',
+    'adsbygoogle',
+    '대용량 이미지입니다.',
+    '확인하시려면 클릭하세요.',
+    '크기 :'
 ]
 
 
