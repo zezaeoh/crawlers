@@ -16,7 +16,7 @@ class RQPipeline(object):
     def process_item(self, item, spider):
         item['media'] = self.media
         item = dict((k, v) for k, v in item.items() if v)
-        self.q.enqueue('workFunctions.dynamo_pipe_line', item, self.table_name)
+        self.q.enqueue('workFunctions.dynamo_pipe_line', item, self.table_name, result_ttl=0)
         log.msg("Post sending to RQ cache!",
                 level=log.DEBUG, spider=spider)
         return item
