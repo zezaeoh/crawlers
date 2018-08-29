@@ -12,7 +12,8 @@ class RQPipeline(object):
         self.table_name = 'content'
 
     def process_item(self, item, spider):
-        self.q.enqueue('workFunctions.process_main', self.table_name, item['cycle'], item['is_first'], result_ttl=0)
+        self.q.enqueue('workFunctions.process_main', self.table_name, item['cycle'], item['is_first'],
+                       result_ttl=0, timeout=7200)
         print('cycle:', item['cycle'])
         print('is_first:', item['is_first'])
         print("Process request sending to RQ cache!")
