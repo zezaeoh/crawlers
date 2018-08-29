@@ -64,3 +64,11 @@
   $ scrapy crawl retriever_crawler -a board_id=<게시판 id>
 ```
 * _현재 테스트중이므로 Json파일로만 저장됩니다._
+
+## Processing_Scheduler
+### spider
+* **processing_start** : 데이터 프로세싱을 위한 스케쥴링 명령 전달
+### how to use
+```
+  $ scrapy crawl process_start -a cycle=<사이클 넘버> -a is_first=<True or False>
+```
