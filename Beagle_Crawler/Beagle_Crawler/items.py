@@ -3,10 +3,18 @@ import re
 
 from scrapy.loader.processors import MapCompose, Join, TakeFirst
 
+filter_list = [
+    'https://',
+    'http://',
+    'www.',
+    'adsbygoogle'
+]
+
 
 def filter_strip(v):
-    if 'adsbygoogle' in v:
-        return ''
+    for a in filter_list:
+        if a in v:
+            return ''
     return v.strip()
 
 
