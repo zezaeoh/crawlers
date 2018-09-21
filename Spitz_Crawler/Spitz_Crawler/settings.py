@@ -18,7 +18,7 @@ LOG_LEVEL = 'ERROR'
 
 DYNAMODB_COMID = 100  #오늘의 유머
 
-RQ_HOST = '13.209.200.84'
+RQ_HOST = '13.209.144.30'
 RQ_PORT = 8888
 
 DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'

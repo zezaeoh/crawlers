@@ -18,7 +18,7 @@ LOG_LEVEL = 'ERROR'
 
 DYNAMODB_COMID = 400  # 레몬테라스
 
-RQ_HOST = '13.209.200.84'
+RQ_HOST = '13.209.144.30'
 RQ_PORT = 8888
 
 DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'

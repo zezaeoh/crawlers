@@ -15,7 +15,7 @@ SPIDER_MODULES = ['Processing_Scheduler.spiders']
 NEWSPIDER_MODULE = 'Processing_Scheduler.spiders'
 LOG_LEVEL = 'ERROR'
 
-RQ_HOST = '13.209.200.84'
+RQ_HOST = '13.209.144.30'
 RQ_PORT = 8888
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent

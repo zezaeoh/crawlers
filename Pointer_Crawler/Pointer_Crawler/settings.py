@@ -17,7 +17,7 @@ LOG_LEVEL = 'ERROR'
 
 DYNAMODB_COMID = 500  # 클리앙
 
-RQ_HOST = '13.209.200.84'
+RQ_HOST = '13.209.144.30'
 RQ_PORT = 8888
 
 DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'
