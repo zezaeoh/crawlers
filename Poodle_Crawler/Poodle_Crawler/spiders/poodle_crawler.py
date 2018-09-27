@@ -110,17 +110,17 @@ class PoodleCrawlSpider(scrapy.Spider):
 
     def parse(self, response):
         self.url_list.clear()
-        for link in response.xpath('//tbody[@class="list_tbody"]//tr[@class="tb"]'):
-            if link.xpath('./td[@class="t_notice"]/text()').extract_first() == '공지':
+        for link in response.xpath('//*[@id="container"]//table[@class="gall_list"]/tbody//tr'):
+            if link.xpath('./@data-no').extract_first() == '1':
                 continue
-            url = link.xpath('./td[@class="t_subject"]/a[1]/@href').extract_first()
+            url = link.xpath('./td[@class="gall_tit ub-word"]/a[1]/@href').extract_first()
             if self.p.search(url):
                 if len(self.furl) <= 5:
                     furl = self.prefix + url
                     furl = furl[:furl.find('&page')]
                     self.furl.append(furl)
-                item = {'writer': link.xpath('./td[@class="t_writer user_layer"]/@user_name').extract(),
-                        'title': link.xpath('./td[@class="t_subject"]/a[1]/text()').extract()}
+                item = {'writer': link.xpath('./td[@class="gall_writer ub-writer"]/@data-nick').extract(),
+                        'title': link.xpath('./td[@class="gall_tit ub-word"]/a[1]/text()').extract()}
                 self.url_list.append({'url': self.prefix + url[:url.find('&page')],
                                       'item': item})
         rq = self.get_filtered_request(is_parse=True)
@@ -136,9 +136,9 @@ class PoodleCrawlSpider(scrapy.Spider):
         i.add_value('title', item['title'])
         i.add_value('writer', item['writer'])
         i.add_value('category', self.gall_id)
-        i.add_xpath('content', '//div[@class="s_write"]/table//text()')
-        i.add_xpath('date', '//*[@id="dgn_content_de"]//div[@class="w_top_right"]//text()')
-        i.add_xpath('pic', '//div[@class="s_write"]/table//img/@src')
+        i.add_xpath('content', '//div[@class="writing_view_box"]/div[@style="overflow:hidden;"]//text()')
+        i.add_xpath('date', '//span[@class="gall_date"]/@title')
+        i.add_xpath('pic', '//div[@class="writing_view_box"]/div[@style="overflow:hidden;"]//img/@src')
         i.add_value('url', response.url)
         re_i = i.load_item()
         if 'date' not in re_i:
